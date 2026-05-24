@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="App Automation Suite" verbose="2" parallel="methods" thread-count="1">
+
+    <listeners>
+        <listener class-name="com.onsurity.listeners.ExtentReportListener"/>
+        <listener class-name="com.onsurity.listeners.RetryTransformer"/>
+    </listeners>
+
+    <!-- ==================== Add Your Test Classes Below ==================== -->
+
+    <!--
+    <test name="Smoke Tests">
+        <groups>
+            <run>
+                <include name="smoke"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.onsurity.tests.your_module.YourTest"/>
+        </classes>
+    </test>
+    -->
+
+    <!--
+    <test name="E2E Tests">
+        <classes>
+            <class name="com.onsurity.tests.your_module.YourE2ETest"/>
+        </classes>
+    </test>
+    -->
+
+</suite>

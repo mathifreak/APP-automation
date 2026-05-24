@@ -1,0 +1,53 @@
+# ============================================================
+# App Automation Framework — .gitignore
+# ============================================================
+
+# === Build & IDE ===
+target/
+*.class
+*.jar
+*.war
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath
+out/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# === Test Output ===
+test-output/
+allure-results/
+logs/
+ExtentReport*.html
+
+# === App Binaries (large files — download separately) ===
+src/test/resources/apps/*.apk
+src/test/resources/apps/*.ipa
+!src/test/resources/apps/.gitkeep
+
+# === ChromeDriver Binaries (download per machine) ===
+src/test/resources/chromedriver/
+!src/test/resources/chromedriver/.gitkeep
+
+# === Screenshots & Downloads ===
+test-output/screenshots/
+target/downloads/
+
+# === Secrets — Environment Configs with Real Credentials ===
+# Only .template files are tracked; real configs are local-only
+src/test/resources/config/staging.properties
+src/test/resources/config/production.properties
+src/test/resources/config/.phone_counter
+
+# === Maven ===
+dependency-reduced-pom.xml
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar

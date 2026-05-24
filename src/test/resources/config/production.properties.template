@@ -1,0 +1,27 @@
+# ============================================================
+# Production Environment Configuration — TEMPLATE
+# ============================================================
+#
+# SETUP: Copy this file to 'production.properties' and fill in
+#        your environment-specific values.
+#
+#   cp production.properties.template production.properties
+#
+# WARNING: Never commit 'production.properties' — it contains secrets.
+# ============================================================
+
+env=production
+
+# --- App Paths (production build) ---
+android.app.path=src/test/resources/apps/app-production.apk
+ios.app.path=src/test/resources/apps/app-production.ipa
+
+# --- App Bundle ID ---
+app.bundle.id=com.onsurity.app
+
+# --- API Base URL ---
+api.base.url=https://api.onsurity.com
+
+# --- Test Credentials (production test account) ---
+test.mobile.number=
+test.otp=

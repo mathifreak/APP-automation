@@ -1,0 +1,14 @@
+{
+  "platformName": "iOS",
+  "appium:automationName": "XCUITest",
+  "appium:deviceName": "iPhone 15",
+  "appium:platformVersion": "17.5",
+  "appium:noReset": false,
+  "appium:fullReset": false,
+  "appium:newCommandTimeout": 300,
+  "appium:usePrebuiltWDA": true,
+  "appium:wdaStartupRetries": 3,
+  "appium:wdaStartupRetryInterval": 20000,
+  "appium:showXcodeLog": false,
+  "appium:isHeadless": false
+}
