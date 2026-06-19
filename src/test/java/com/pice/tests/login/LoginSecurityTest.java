@@ -18,38 +18,46 @@ import org.testng.annotations.Test;
 /**
  * Login Security Test Suite for the Pice App.
  *
- * <p>Covers security-focused scenarios for the login and OTP flow:
+ * <p>
+ * Covers security-focused scenarios for the login and OTP flow:
  * <ul>
- *   <li>OTP field masking (is OTP displayed as password-type)</li>
- *   <li>Brute-force OTP attempts — UI feedback after multiple failures</li>
- *   <li>Attempt-limit message visibility</li>
- *   <li>Documented stubs for backend-dependent security tests</li>
+ * <li>OTP field masking (is OTP displayed as password-type)</li>
+ * <li>Brute-force OTP attempts — UI feedback after multiple failures</li>
+ * <li>Attempt-limit message visibility</li>
+ * <li>Documented stubs for backend-dependent security tests</li>
  * </ul>
  *
- * <p><b>Note on stubs:</b> Most security validations require backend state manipulation
- * (e.g., account lock reset, OTP reuse detection, session invalidation). These are
- * implemented as {@code enabled = false} stubs with clear TODO comments for future
+ * <p>
+ * <b>Note on stubs:</b> Most security validations require backend state
+ * manipulation
+ * (e.g., account lock reset, OTP reuse detection, session invalidation). These
+ * are
+ * implemented as {@code enabled = false} stubs with clear TODO comments for
+ * future
  * integration with backend APIs.
  *
- * <p><b>Prerequisites:</b> Physical device, valid credentials, Appium server on localhost:4723.
+ * <p>
+ * <b>Prerequisites:</b> Physical device, valid credentials, Appium server on
+ * localhost:4723.
  *
- * <p><b>Run:</b>
+ * <p>
+ * <b>Run:</b>
+ * 
  * <pre>{@code make test-batch-login-security}</pre>
  */
 public class LoginSecurityTest extends BaseTest {
 
     private static final Logger log = LogManager.getLogger(LoginSecurityTest.class);
 
-    private static final String PHONE_NUMBER =
-            com.pice.config.ConfigManager.get("test.mobile.number", "9962063736");
+    private static final String PHONE_NUMBER = com.pice.config.ConfigManager.get("test.mobile.number", "9962063736");
     private static final String DEVICE_SERIAL = getConnectedDeviceSerial();
 
     // Wrong OTP — guaranteed to be invalid
     private static final String OTP_WRONG = com.pice.config.ConfigManager.get("login.otp.wrong", "000000");
 
     // Number of brute-force attempts to perform in security tests
-    private static final int BRUTE_FORCE_ATTEMPTS =
-            Integer.parseInt(com.pice.config.ConfigManager.get("login.security.brute.force.attempts", "3"));
+    private static final int BRUTE_FORCE_ATTEMPTS = Integer
+            .parseInt(com.pice.config.ConfigManager.get("login.security.brute.force.attempts", "3"));
 
     private OtpPage otpPage;
 
@@ -65,12 +73,12 @@ public class LoginSecurityTest extends BaseTest {
     public void cleanLaunchForSecurityTests() {
         log.info("--- [Security Suite] BeforeClass: Clear app data + launch fresh ---");
         try {
-            Runtime.getRuntime().exec(new String[]{
+            Runtime.getRuntime().exec(new String[] {
                     "adb", "-s", DEVICE_SERIAL, "shell", "pm", "clear", "one.pice.pice_business_loan.pre"
             }).waitFor();
             Thread.sleep(1500);
 
-            Runtime.getRuntime().exec(new String[]{
+            Runtime.getRuntime().exec(new String[] {
                     "adb", "-s", DEVICE_SERIAL, "shell", "am", "start", "-n",
                     "one.pice.pice_business_loan.pre/one.pice.pice_business_loan.MainActivity"
             }).waitFor();
@@ -117,7 +125,7 @@ public class LoginSecurityTest extends BaseTest {
 
     private static String getConnectedDeviceSerial() {
         try {
-            Process p = Runtime.getRuntime().exec(new String[]{"adb", "devices"});
+            Process p = Runtime.getRuntime().exec(new String[] { "adb", "devices" });
             java.io.BufferedReader r = new java.io.BufferedReader(new java.io.InputStreamReader(p.getInputStream()));
             String line;
             while ((line = r.readLine()) != null) {
@@ -126,17 +134,15 @@ public class LoginSecurityTest extends BaseTest {
                     return line.split("\\s+")[0];
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return "10MG56FM6E000FD";
     }
 
     // ==================== AUTOMATABLE SECURITY TESTS ====================
 
-    @Test(
-        groups = {TestGroups.REGRESSION, TestGroups.LOGIN, TestGroups.POSITIVE},
-        description = "[Security] Verify OTP input field is masked (password-type input, not visible text)",
-        priority = 1
-    )
+    @Test(groups = { TestGroups.REGRESSION, TestGroups.LOGIN,
+            TestGroups.POSITIVE }, description = "[Security] Verify OTP input field is masked (password-type input, not visible text)", priority = 1)
     public void verifyOtpFieldIsMasked() {
         log.info("===== TEST: verifyOtpFieldIsMasked =====");
 
@@ -159,11 +165,8 @@ public class LoginSecurityTest extends BaseTest {
         log.info("===== TEST PASSED: verifyOtpFieldIsMasked =====");
     }
 
-    @Test(
-        groups = {TestGroups.REGRESSION, TestGroups.LOGIN, TestGroups.NEGATIVE},
-        description = "[Security] Verify repeated wrong OTP submissions show UI error feedback",
-        priority = 2
-    )
+    @Test(groups = { TestGroups.REGRESSION, TestGroups.LOGIN,
+            TestGroups.NEGATIVE }, description = "[Security] Verify repeated wrong OTP submissions show UI error feedback", priority = 2)
     public void verifyBruteForceOtpShowsError() {
         log.info("===== TEST: verifyBruteForceOtpShowsError =====");
         ExtentReportListener.logStep("Performing " + BRUTE_FORCE_ATTEMPTS + " wrong OTP submissions");
@@ -194,7 +197,7 @@ public class LoginSecurityTest extends BaseTest {
             // If screen transitioned away (e.g., account locked), stop early
             if (!onOtpScreen) {
                 log.warn("OTP screen no longer displayed after {} attempts — possible account lock", attempt);
-                ExtentReportListener.logStep("⚠️ OTP screen left after " + attempt + " attempts — account may be locked");
+                ExtentReportListener.logStep("OTP screen left after " + attempt + " attempts — account may be locked");
                 break;
             }
         }
@@ -203,15 +206,13 @@ public class LoginSecurityTest extends BaseTest {
         log.info("===== TEST PASSED: verifyBruteForceOtpShowsError =====");
     }
 
-    @Test(
-        groups = {TestGroups.REGRESSION, TestGroups.LOGIN, TestGroups.NEGATIVE},
-        description = "[Security] Verify an attempt limit message is shown after multiple wrong OTP submissions",
-        priority = 3
-    )
+    @Test(groups = { TestGroups.REGRESSION, TestGroups.LOGIN,
+            TestGroups.NEGATIVE }, description = "[Security] Verify an attempt limit message is shown after multiple wrong OTP submissions", priority = 3)
     public void verifyOtpAttemptLimitMessage() {
         log.info("===== TEST: verifyOtpAttemptLimitMessage =====");
 
-        // Perform multiple wrong OTP attempts (same as brute force test, but focus on limit message)
+        // Perform multiple wrong OTP attempts (same as brute force test, but focus on
+        // limit message)
         String attemptLimitMsg = "";
         for (int attempt = 1; attempt <= BRUTE_FORCE_ATTEMPTS; attempt++) {
             log.info("Wrong OTP attempt {}/{}", attempt, BRUTE_FORCE_ATTEMPTS);
@@ -250,72 +251,64 @@ public class LoginSecurityTest extends BaseTest {
     // ==================== STUB TESTS (enabled=false) ====================
     // These require backend API access, session management, or network proxies.
 
-    @Test(
-        groups = {TestGroups.REGRESSION, TestGroups.LOGIN, TestGroups.NEGATIVE},
-        description = "[STUB] Verify account is locked after N consecutive wrong OTP attempts — requires backend state reset after test",
-        priority = 50,
-        enabled = false
-        // TODO: Determine exact lock threshold from backend. After test, call backend API to unlock account.
-        // Steps: (1) Enter wrong OTP N times, (2) Assert 'account locked' UI, (3) Reset account via API
+    @Test(groups = { TestGroups.REGRESSION, TestGroups.LOGIN,
+            TestGroups.NEGATIVE }, description = "[STUB] Verify account is locked after N consecutive wrong OTP attempts — requires backend state reset after test", priority = 50, enabled = false
+    // TODO: Determine exact lock threshold from backend. After test, call backend
+    // API to unlock account.
+    // Steps: (1) Enter wrong OTP N times, (2) Assert 'account locked' UI, (3) Reset
+    // account via API
     )
     public void verifyAccountLockAfterNFailures() {
         log.info("===== STUB TEST: verifyAccountLockAfterNFailures — requires backend API =====");
     }
 
-    @Test(
-        groups = {TestGroups.REGRESSION, TestGroups.LOGIN, TestGroups.NEGATIVE},
-        description = "[STUB] Verify OTP value is not exposed in API response body — requires network interceptor/proxy",
-        priority = 51,
-        enabled = false
-        // TODO: Set up an HTTP proxy (e.g., BrowserMob, Charles) to intercept and inspect API responses.
-        // Steps: (1) Trigger OTP, (2) Inspect all outbound API responses, (3) Assert OTP value is NOT in any response body
+    @Test(groups = { TestGroups.REGRESSION, TestGroups.LOGIN,
+            TestGroups.NEGATIVE }, description = "[STUB] Verify OTP value is not exposed in API response body — requires network interceptor/proxy", priority = 51, enabled = false
+    // TODO: Set up an HTTP proxy (e.g., BrowserMob, Charles) to intercept and
+    // inspect API responses.
+    // Steps: (1) Trigger OTP, (2) Inspect all outbound API responses, (3) Assert
+    // OTP value is NOT in any response body
     )
     public void verifyOtpNotExposedInApiResponse() {
         log.info("===== STUB TEST: verifyOtpNotExposedInApiResponse — requires network proxy =====");
     }
 
-    @Test(
-        groups = {TestGroups.REGRESSION, TestGroups.LOGIN, TestGroups.NEGATIVE},
-        description = "[STUB] Verify OTP session is invalidated after successful login — requires backend session API",
-        priority = 52,
-        enabled = false
-        // TODO: After login, try to use the same OTP again via API → expect 401/invalid token response
+    @Test(groups = { TestGroups.REGRESSION, TestGroups.LOGIN,
+            TestGroups.NEGATIVE }, description = "[STUB] Verify OTP session is invalidated after successful login — requires backend session API", priority = 52, enabled = false
+    // TODO: After login, try to use the same OTP again via API → expect 401/invalid
+    // token response
     )
     public void verifyOtpExpiredAfterSuccessfulLogin() {
         log.info("===== STUB TEST: verifyOtpExpiredAfterSuccessfulLogin — requires backend API =====");
     }
 
-    @Test(
-        groups = {TestGroups.REGRESSION, TestGroups.LOGIN, TestGroups.NEGATIVE},
-        description = "[STUB] Verify OTP cannot be reused — second use of same OTP should fail",
-        priority = 53,
-        enabled = false
-        // TODO: Login successfully with OTP, then logout and try to use the same OTP again
-        // This requires knowing the OTP value (SMS API) and backend validation
+    @Test(groups = { TestGroups.REGRESSION, TestGroups.LOGIN,
+            TestGroups.NEGATIVE }, description = "[STUB] Verify OTP cannot be reused — second use of same OTP should fail", priority = 53, enabled = false
+    // TODO: Login successfully with OTP, then logout and try to use the same OTP
+    // again
+    // This requires knowing the OTP value (SMS API) and backend validation
     )
     public void verifyOtpCannotBeReused() {
         log.info("===== STUB TEST: verifyOtpCannotBeReused — requires SMS API + backend =====");
     }
 
-    @Test(
-        groups = {TestGroups.REGRESSION, TestGroups.LOGIN, TestGroups.NEGATIVE},
-        description = "[STUB] Verify OTP session expires after logout — re-using OTP after logout should fail",
-        priority = 54,
-        enabled = false
-        // TODO: Login → Logout → Navigate back to OTP screen → Enter old OTP → Expect error
-        // Requires: knowing the OTP value, which needs SMS gateway or static test OTP environment
+    @Test(groups = { TestGroups.REGRESSION, TestGroups.LOGIN,
+            TestGroups.NEGATIVE }, description = "[STUB] Verify OTP session expires after logout — re-using OTP after logout should fail", priority = 54, enabled = false
+    // TODO: Login → Logout → Navigate back to OTP screen → Enter old OTP → Expect
+    // error
+    // Requires: knowing the OTP value, which needs SMS gateway or static test OTP
+    // environment
     )
     public void verifyOtpExpiredOnLogout() {
         log.info("===== STUB TEST: verifyOtpExpiredOnLogout — requires session management support =====");
     }
 
-    @Test(
-        groups = {TestGroups.REGRESSION, TestGroups.LOGIN, TestGroups.NEGATIVE},
-        description = "[STUB] Verify blacklisted/blocked phone number cannot trigger OTP — requires test blacklist entry",
-        priority = 55,
-        enabled = false
-        // TODO: Register a phone number in backend as blacklisted (test environment only)
-        // Steps: (1) Enter blacklisted number, (2) Tap Proceed, (3) Assert error message or OTP not sent
+    @Test(groups = { TestGroups.REGRESSION, TestGroups.LOGIN,
+            TestGroups.NEGATIVE }, description = "[STUB] Verify blacklisted/blocked phone number cannot trigger OTP — requires test blacklist entry", priority = 55, enabled = false
+    // TODO: Register a phone number in backend as blacklisted (test environment
+    // only)
+    // Steps: (1) Enter blacklisted number, (2) Tap Proceed, (3) Assert error
+    // message or OTP not sent
     )
     public void verifyBlacklistedPhoneCannotTriggerOtp() {
         log.info("===== STUB TEST: verifyBlacklistedPhoneCannotTriggerOtp — requires backend test data =====");
@@ -324,6 +317,10 @@ public class LoginSecurityTest extends BaseTest {
     // ==================== Private Helpers ====================
 
     private void sleep(long millis) {
-        try { Thread.sleep(millis); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }
