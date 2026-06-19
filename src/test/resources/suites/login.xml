@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!-- Run: make test-batch-login -->
+<!-- Covers: Phone Validation — Smoke + Regression (emulator-safe, no OTP entry needed) -->
+<suite name="Login Module Batch" verbose="2" parallel="none" thread-count="1">
+
+    <listeners>
+        <listener class-name="com.pice.listeners.ExtentReportListener"/>
+        <listener class-name="com.pice.listeners.RetryTransformer"/>
+    </listeners>
+
+    <!-- Smoke sub-batch: UI elements + initial state -->
+    <test name="[Batch-2] Login — Smoke" preserve-order="true">
+        <groups>
+            <run>
+                <include name="smoke"/>
+                <include name="login"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.pice.tests.login.LoginTest">
+                <methods>
+                    <include name="verifyLoginScreenElements"/>
+                    <include name="verifyProceedButtonDisabledByDefault"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- Regression sub-batch: Positive + Negative + Boundary + Edge (Phone Validation) -->
+    <test name="[Batch-3] Login — Phone Validation Regression" preserve-order="true">
+        <groups>
+            <run>
+                <include name="regression"/>
+                <include name="login"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.pice.tests.login.LoginTest">
+                <methods>
+                    <!-- Positive -->
+                    <include name="verifyPhoneNumberEntry"/>
+                    <include name="verifyProceedButtonEnabledAfterConsent"/>
+                    <include name="verifyLoginFlowUpToProceed"/>
+                    <!-- Positive — Boundary -->
+                    <include name="verifyProceedEnabledForExactTenDigits"/>
+                    <include name="verifySequentialDigitsPhone"/>
+                    <include name="verifyAllSameDigitsPhone"/>
+                    <!-- Negative -->
+                    <include name="verifyProceedDisabledForShortNumber"/>
+                    <include name="verifyProceedDisabledWithoutConsent"/>
+                    <include name="verifyProceedDisabledForEmptyNumber"/>
+                    <include name="verifyProceedDisabledForNineDigits"/>
+                    <include name="verifyProceedDisabledForElevenDigits"/>
+                    <include name="verifyProceedDisabledForSpecialChars"/>
+                    <include name="verifyProceedDisabledForSpacesOnly"/>
+                    <include name="verifyProceedDisabledForLeadingSpaces"/>
+                    <include name="verifyProceedDisabledForMixedAlphanumeric"/>
+                    <include name="verifyPhoneFieldNumericOnly"/>
+                    <!-- Edge -->
+                    <include name="verifyConsentCheckboxToggle"/>
+                    <include name="verifyHelpButtonNavigation"/>
+                    <include name="verifyNumberStartingWithZero"/>
+                    <include name="verifyPhoneWithPlus91Prefix"/>
+                    <include name="verifyRootDetectionOnEmulator"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+</suite>

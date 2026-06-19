@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!-- Run: make run TEST=com.pice.tests.history.HistoryTest -->
+<!-- Run full suite: mvn test -Dtestng.suite.file=src/test/resources/suites/history.xml -Dplatform=android -Denv=staging -->
+<!-- Requires: physical device + valid credentials (test.mobile.number, test.otp) -->
+<suite name="History Screen Batch" verbose="2" parallel="none" thread-count="1">
+
+    <listeners>
+        <listener class-name="com.pice.listeners.ExtentReportListener"/>
+        <listener class-name="com.pice.listeners.RetryTransformer"/>
+    </listeners>
+
+    <!-- Smoke: Verify History screen loads with all UI elements -->
+    <test name="[Batch-9] History — Smoke" preserve-order="true">
+        <classes>
+            <class name="com.pice.tests.history.HistoryTest">
+                <methods>
+                    <include name="verifyHistoryScreenElements"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- Regression: Filter tabs -->
+    <test name="[Batch-9] History — Regression: Filters" preserve-order="true">
+        <classes>
+            <class name="com.pice.tests.history.HistoryTest">
+                <methods>
+                    <include name="verifyFilterAllTab"/>
+                    <include name="verifyFilterPaymentsTab"/>
+                    <include name="verifyFilterCardsTab"/>
+                    <include name="verifyFilterLoanTab"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- Regression: Transaction list content -->
+    <test name="[Batch-9] History — Regression: Transaction List" preserve-order="true">
+        <classes>
+            <class name="com.pice.tests.history.HistoryTest">
+                <methods>
+                    <include name="verifyTransactionListContent"/>
+                    <include name="verifyTransactionDetailNavigation"/>
+                    <include name="verifyScrollBehavior"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- Regression: Negative / edge cases -->
+    <test name="[Batch-9] History — Regression: Negative" preserve-order="true">
+        <classes>
+            <class name="com.pice.tests.history.HistoryTest">
+                <methods>
+                    <include name="verifyRapidFilterSwitching"/>
+                    <include name="verifyEmptyStateOnFilterWithNoData"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- E2E: Full History navigation cycle -->
+    <test name="[Batch-9] History — E2E" preserve-order="true">
+        <classes>
+            <class name="com.pice.tests.history.HistoryTest">
+                <methods>
+                    <include name="verifyHistoryE2EFlow"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+</suite>

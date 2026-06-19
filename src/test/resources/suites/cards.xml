@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!--
+  ==========================================================
+   Cards Module — Add Card Flow
+   Requires physical device + valid credentials
+  ==========================================================
+   Run: make test-batch-cards ENV=staging
+        make test-module MODULE=cards ENV=staging
+  ==========================================================
+-->
+<suite name="Cards — Add Card Flow Suite"
+       verbose="2"
+       parallel="none"
+       thread-count="1">
+
+    <listeners>
+        <listener class-name="com.pice.listeners.ExtentReportListener"/>
+        <listener class-name="com.pice.listeners.RetryTransformer"/>
+    </listeners>
+
+    <test name="Cards — Add Card Flow" preserve-order="true">
+        <classes>
+            <class name="com.pice.tests.cards.AddCardFlowTest">
+                <methods>
+                    <!-- Smoke -->
+                    <include name="verifyCardsScreenElements"/>
+                    <include name="verifyAddCardButtonVisible"/>
+                    <!-- Positive — Navigation -->
+                    <include name="verifyAddCardButtonNavigation"/>
+                    <include name="verifyAddCardFormElements"/>
+                    <!-- Positive — Field Interactions -->
+                    <include name="verifyCardNumberFieldInput"/>
+                    <include name="verifyExpiryDateFieldInput"/>
+                    <include name="verifyCvvFieldInput"/>
+                    <include name="verifyCardholderNameFieldInput"/>
+                    <!-- Negative — Validation -->
+                    <include name="verifySubmitDisabledWithEmptyFields"/>
+                    <include name="verifyInvalidCardNumberRejected"/>
+                    <!-- Positive — Back Navigation -->
+                    <include name="verifyBackNavigationFromAddCard"/>
+                    <include name="verifyBackNavigationFromCardsToDashboard"/>
+                    <!-- E2E -->
+                    <include name="verifyAddCardE2EFlow"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+</suite>

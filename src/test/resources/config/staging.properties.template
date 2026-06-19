@@ -18,14 +18,14 @@ android.app.path=src/test/resources/apps/app-release.apk
 ios.app.path=src/test/resources/apps/app-staging.ipa
 
 # --- App Bundle ID ---
-app.bundle.id=com.onsurity.tech
+app.bundle.id=
 
 # --- API Base URL (for test data setup) ---
-api.base.url=https://staging-api.onsurity.com
+api.base.url=
 
 # --- Partner Integration API (Invite Member) ---
-api.invite.base.url=https://employeesure.qa.onsurity.org
-api.invite.account.id=OSHE-XXXXXXXXXXXX
+api.invite.base.url=
+api.invite.account.id=
 api.invite.ignore.signature=true
 api.phone.counter.file=src/test/resources/config/.phone_counter
 
@@ -39,33 +39,7 @@ appium.node.path=/path/to/node
 appium.binary.path=/path/to/appium
 
 # --- Test Credentials ---
-test.mobile.number=XXXXXXXXXX
-test.otp=XXXX
+test.mobile.number=
+test.otp=
 
-# --- MongoDB Configuration ---
-# Connection string format: mongodb://user:pass@host:port/db?authSource=admin
-mongodb.connection.string=mongodb://USER:PASSWORD@HOST:PORT/DB?authSource=admin&replicaSet=REPLICA_SET
-mongodb.database=HealthSure
-mongodb.connect.timeout.ms=10000
-mongodb.socket.timeout.ms=15000
-mongodb.server.selection.timeout.ms=10000
 
-# --- MySQL Configuration ---
-# JDBC URL format: jdbc:mysql://host:port/database
-mysql.jdbc.url=jdbc:mysql://HOST:PORT/
-mysql.username=YOUR_MYSQL_USER
-mysql.password=YOUR_MYSQL_PASSWORD
-mysql.pool.max.size=3
-mysql.pool.min.idle=1
-mysql.connection.timeout.ms=10000
-mysql.idle.timeout.ms=30000
-mysql.max.lifetime.ms=600000
-
-# --- Offers E2E Test Data ---
-offers.test.mobile.number=XXXXXXXXXX
-offers.test.otp=XXXX
-offers.test.pincode=560103
-offers.test.card.number=4111111111111111
-offers.test.card.expiry=12/34
-offers.test.card.cvv=123
-offers.test.dummy.address=Test Address 123, Automation Street, Floor 4

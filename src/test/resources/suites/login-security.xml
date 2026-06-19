@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!-- Run: make test-batch-login-security -->
+<!-- Requires: Physical device + valid registered phone number (test.mobile.number) -->
+<!-- Note: Most security tests require OTP screen access (real device, no root detection) -->
+<suite name="Login Security Batch" verbose="2" parallel="none" thread-count="1">
+
+    <listeners>
+        <listener class-name="com.pice.listeners.ExtentReportListener"/>
+        <listener class-name="com.pice.listeners.RetryTransformer"/>
+    </listeners>
+
+    <!-- Automatable security tests only (enabled=true tests) -->
+    <!-- Stub tests (enabled=false) are intentionally excluded — they won't run via TestNG -->
+    <test name="[Batch-Security] Login Security — Automatable Checks" preserve-order="true">
+        <classes>
+            <class name="com.pice.tests.login.LoginSecurityTest">
+                <methods>
+                    <include name="verifyOtpFieldIsMasked"/>
+                    <include name="verifyBruteForceOtpShowsError"/>
+                    <include name="verifyOtpAttemptLimitMessage"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+</suite>

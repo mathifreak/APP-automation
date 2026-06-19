@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!--
+  ==========================================================
+   Cards Module — Pay Bill Flow
+   Covers: Pay Bills tab UI, Add Credit Card dialog (7649 + IndusInd),
+           Other Banks sheet, Fetch Bill negative scenario, E2E flow
+   Requires physical device + valid credentials
+  ==========================================================
+   Run: make test-batch-paybill ENV=staging
+        make test-module MODULE=paybill ENV=staging
+  ==========================================================
+-->
+<suite name="Cards — Pay Bill Flow Suite"
+       verbose="2"
+       parallel="none"
+       thread-count="1">
+
+    <listeners>
+        <listener class-name="com.pice.listeners.ExtentReportListener"/>
+        <listener class-name="com.pice.listeners.RetryTransformer"/>
+    </listeners>
+
+    <test name="Cards — Pay Bill Flow" preserve-order="true">
+        <classes>
+            <class name="com.pice.tests.cards.PayBillTest">
+                <methods>
+                    <!-- Smoke -->
+                    <include name="verifyPayBillsScreenElements"/>
+                    <include name="verifyAddCardButtonVisible"/>
+                    <include name="verifyExistingCardsVisible"/>
+                    <!-- Positive — Dialog -->
+                    <include name="verifyAddCardDialogOpens"/>
+                    <include name="verifyAddCardDialogElements"/>
+                    <include name="verifyDigitEntryFor7649"/>
+                    <include name="verifyOtherBanksSheetOpens"/>
+                    <include name="verifyDialogCloseNavigation"/>
+                    <!-- Negative — with screenshots -->
+                    <include name="verifyFetchBillUnlinkedCardError"/>
+                    <include name="verifyAddCardWithRandomDataFails"/>
+                    <!-- E2E -->
+                    <include name="verifyAddCreditCardE2EFlow"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+</suite>

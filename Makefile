@@ -5,9 +5,9 @@
 # ============================================================================
 
 # ---- Environment (override via CLI: make run ENV=staging) ----
-JAVA_HOME   ?= /Users/Boobala/Library/Java/JavaVirtualMachines/corretto-17.0.18/Contents/Home
-ANDROID_HOME ?= /Users/Boobala/Library/Android/sdk
-MVN          ?= /opt/homebrew/bin/mvn
+JAVA_HOME   ?= /Library/Java/JavaVirtualMachines/jdk-18.jdk/Contents/Home
+ANDROID_HOME ?= /Users/Mathi/Library/Android/sdk
+MVN          ?= /Users/Mathi/tools/apache-maven-3.9.8/bin/mvn
 ADB          ?= $(ANDROID_HOME)/platform-tools/adb
 PLATFORM     ?= android
 ENV          ?= staging
@@ -17,7 +17,7 @@ POM          ?= pom.xml
 MVN_CMD = JAVA_HOME=$(JAVA_HOME) ANDROID_HOME=$(ANDROID_HOME) $(MVN) -f $(POM)
 
 # ---- Fully qualified test class names ----
-PKG_BASE     = com.onsurity.tests
+PKG_BASE     = com.pice.tests
 
 # ============================================================================
 #  🏗️  BUILD
@@ -43,18 +43,93 @@ build: clean compile
 #  🧪  TEST TARGETS
 # ============================================================================
 
-.PHONY: run test-all test-e2e test-regression test-by-group
+.PHONY: run test-all test-e2e test-regression test-by-group \
+        test-module test-batch-smoke test-batch-login test-batch-login-e2e test-batch-api test-batch-dashboard test-batch-cards test-batch-history \
+        test-batch-login-otp test-batch-login-security
 
-## Run a specific test class (usage: make run TEST=com.onsurity.tests.module.MyTest)
+## Run a specific test class (usage: make run TEST=com.pice.tests.module.MyTest)
 run: compile
 	@echo "▶️  Running $(TEST) — env=$(ENV), platform=$(PLATFORM)"
 	$(MVN_CMD) test -Dtest=$(TEST) -Dplatform=$(PLATFORM) -Denv=$(ENV)
 
-## Run all tests via TestNG suite XML
+## Run all tests via TestNG suite XML (all batches in sequence)
 test-all: compile
-	@echo "🚀 Running full TestNG suite — env=$(ENV), platform=$(PLATFORM)"
-	$(MVN_CMD) test -DsuiteXmlFile=src/test/resources/testng.xml -Dplatform=$(PLATFORM) -Denv=$(ENV)
+	@echo "🚀 Running full TestNG suite (all batches) — env=$(ENV), platform=$(PLATFORM)"
+	$(MVN_CMD) test -Dtestng.suite.file=src/test/resources/testng.xml -Dplatform=$(PLATFORM) -Denv=$(ENV)
 
+## ── Module-wise Batch Targets ─────────────────────────────────────────────
+## Run a specific module batch by name
+##   MODULE options: smoke | login | login-e2e | login-otp | login-security | api | dashboard | cards | history
+##   Usage: make test-module MODULE=login-otp
+test-module: compile
+	@if [ -z "$(MODULE)" ]; then echo "❌ MODULE is required. E.g.: make test-module MODULE=login"; exit 1; fi
+	@SUITE=src/test/resources/suites/$(MODULE).xml; \
+	if [ ! -f "$$SUITE" ]; then echo "❌ Suite not found: $$SUITE"; exit 1; fi; \
+	echo "🎯 Running batch: $(MODULE) — env=$(ENV), platform=$(PLATFORM)"; \
+	$(MVN_CMD) test -Dtestng.suite.file=$$SUITE -Dplatform=$(PLATFORM) -Denv=$(ENV)
+
+## [Batch-1] Smoke — app launch + framework sanity
+test-batch-smoke: compile
+	@echo "🔥 [Batch-1] Smoke tests — env=$(ENV), platform=$(PLATFORM)"
+	$(MVN_CMD) test -Dtestng.suite.file=src/test/resources/suites/smoke.xml -Dplatform=$(PLATFORM) -Denv=$(ENV)
+
+## [Batch-2+3] Login — Smoke + Regression (emulator-safe)
+test-batch-login: compile
+	@echo "🔐 [Batch-2+3] Login module (Smoke + Regression) — env=$(ENV), platform=$(PLATFORM)"
+	$(MVN_CMD) test -Dtestng.suite.file=src/test/resources/suites/login.xml -Dplatform=$(PLATFORM) -Denv=$(ENV)
+
+## [Batch-4] Login E2E — Full flow: Login → OTP → Permission → Dashboard
+##   Requires physical device + test.mobile.number + test.otp
+test-batch-login-e2e: compile
+	@echo "📲 [Batch-4] Login E2E flow — env=$(ENV), platform=$(PLATFORM)"
+	$(MVN_CMD) test -Dtestng.suite.file=src/test/resources/suites/login-e2e.xml -Dplatform=$(PLATFORM) -Denv=$(ENV)
+
+## [Batch-5] API — REST Assured backend tests
+test-batch-api: compile
+	@echo "🌐 [Batch-5] API tests — env=$(ENV), platform=$(PLATFORM)"
+	$(MVN_CMD) test -Dtestng.suite.file=src/test/resources/suites/api.xml -Dplatform=$(PLATFORM) -Denv=$(ENV)
+
+## [Batch-6] Home Dashboard — click all buttons, navigate all tabs
+##   Requires physical device + test.mobile.number + test.otp
+test-batch-dashboard: compile
+	@echo "🏠 [Batch-6] Home Dashboard tests — env=$(ENV), platform=$(PLATFORM)"
+	$(MVN_CMD) test -Dtestng.suite.file=src/test/resources/suites/dashboard.xml -Dplatform=$(PLATFORM) -Denv=$(ENV)
+
+## [Batch-7] Cards — Add Card flow tests
+##   Requires physical device + test.mobile.number + test.otp
+test-batch-cards: compile
+	@echo "💳 [Batch-7] Cards — Add Card Flow tests — env=$(ENV), platform=$(PLATFORM)"
+	$(MVN_CMD) test -Dtestng.suite.file=src/test/resources/suites/cards.xml -Dplatform=$(PLATFORM) -Denv=$(ENV)
+
+## [Batch-8] Pay Bills — Pay Bill flow tests (card 7649 + IndusInd, negative screenshots)
+##   Requires physical device + test.mobile.number + test.otp
+test-batch-paybill: compile
+	@echo "💳 [Batch-8] Pay Bills — Pay Bill Flow tests — env=$(ENV), platform=$(PLATFORM)"
+	$(MVN_CMD) test -Dtestng.suite.file=src/test/resources/suites/paybill.xml -Dplatform=$(PLATFORM) -Denv=$(ENV)
+
+## [Batch-9] History — History screen tests
+##   Requires physical device + test.mobile.number + test.otp
+##   Tests: smoke, filter tabs (All/Payments/Cards/Loan), transaction list, scroll, E2E
+test-batch-history: compile
+	@echo "📋 [Batch-9] History Screen tests — env=$(ENV), platform=$(PLATFORM)"
+	$(MVN_CMD) test -Dtestng.suite.file=src/test/resources/suites/history.xml -Dplatform=$(PLATFORM) -Denv=$(ENV)
+
+## [Batch-OTP] OTP Validation — OTP entry, resend timer, network edge cases
+##   Requires physical device + valid registered phone number (test.mobile.number)
+##   Runs: OtpValidationTest (excludes enabled=false stubs)
+test-batch-login-otp: compile
+	@echo "🔑 [Batch-OTP] OTP Validation tests — env=$(ENV), platform=$(PLATFORM)"
+	$(MVN_CMD) test -Dtestng.suite.file=src/test/resources/suites/login-otp.xml -Dplatform=$(PLATFORM) -Denv=$(ENV)
+
+## [Batch-Security] Login Security — OTP masking, brute-force UI, attempt limit
+##   Requires physical device + valid registered phone number (test.mobile.number)
+##   Note: Most security tests require OTP screen access (non-rooted device)
+test-batch-login-security: compile
+	@echo "🛡️  [Batch-Security] Login Security tests — env=$(ENV), platform=$(PLATFORM)"
+	$(MVN_CMD) test -Dtestng.suite.file=src/test/resources/suites/login-security.xml -Dplatform=$(PLATFORM) -Denv=$(ENV)
+
+
+## ── Legacy group-based targets ────────────────────────────────────────────
 ## Run only E2E tests (by group)
 test-e2e: compile
 	@echo "🔄 Running E2E group — env=$(ENV), platform=$(PLATFORM)"
@@ -98,7 +173,7 @@ clear-pdfs:
 	@echo "✅ Device PDFs cleared"
 
 ## Reset app data on device (update package name for your app)
-APP_PACKAGE ?= com.your.app.package
+APP_PACKAGE ?= one.pice.pice_business_loan.pre
 app-reset:
 	@echo "🔄 Resetting app data..."
 	@$(ADB) shell pm clear $(APP_PACKAGE) || true
@@ -131,7 +206,7 @@ logs-tail:
 
 ## Scaffold a new E2E test class
 ## Usage: make new-test NAME=MyNewFeature MODULE=your_module
-##   Creates: src/test/java/com/onsurity/tests/<MODULE>/<NAME>E2ETest.java
+##   Creates: src/test/java/com/pice/tests/<MODULE>/<NAME>E2ETest.java
 new-test:
 ifndef NAME
 	$(error ❌ NAME is required. Usage: make new-test NAME=MyFeature MODULE=your_module)
@@ -139,107 +214,14 @@ endif
 ifndef MODULE
 	$(error ❌ MODULE is required. Usage: make new-test NAME=MyFeature MODULE=your_module)
 endif
-	@mkdir -p src/test/java/com/onsurity/tests/$(MODULE)
-	@TEST_FILE=src/test/java/com/onsurity/tests/$(MODULE)/$(NAME)E2ETest.java; \
+	@mkdir -p src/test/java/com/pice/tests/$(MODULE)
+	@TEST_FILE=src/test/java/com/pice/tests/$(MODULE)/$(NAME)E2ETest.java; \
 	if [ -f "$$TEST_FILE" ]; then \
 		echo "❌ File already exists: $$TEST_FILE"; \
 		exit 1; \
 	fi; \
-	cat > "$$TEST_FILE" <<'TEMPLATE_EOF'
-package com.onsurity.tests.$(MODULE);
-
-import com.onsurity.base.BaseTest;
-import com.onsurity.config.ConfigManager;
-import com.onsurity.constants.TestGroups;
-import com.onsurity.listeners.ExtentReportListener;
-import com.onsurity.utils.*;
-import io.appium.java_client.AppiumDriver;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.Test;
-
-import java.util.List;
-import java.util.Map;
-
-/**
- * E2E Test: $(NAME)
- *
- * <p>Flow: Login → [TODO: define steps] → Validation → Logout</p>
- *
- * <p>Environment: Run with -Denv=staging -Dplatform=android</p>
- */
-public class $(NAME)E2ETest extends BaseTest {
-
-    private static final org.apache.logging.log4j.Logger log =
-            org.apache.logging.log4j.LogManager.getLogger($(NAME)E2ETest.class);
-
-    private String phoneNumber;
-
-    // ==================== Setup ====================
-
-    @BeforeSuite
-    public void suiteSetup() {
-        log.info("========== SUITE SETUP ==========");
-        phoneNumber = ConfigManager.get("login.mobile.number", "");
-        log.info("Phone: {}, Env: {}, Platform: {}",
-                phoneNumber, ConfigManager.getEnvironment(), ConfigManager.get("platform"));
-        log.info("========== SUITE SETUP COMPLETE ==========");
-    }
-
-    @BeforeClass
-    public void setupDriver() {
-        log.info("---------- CREATING DRIVER ----------");
-        createDriver(null);
-        log.info("---------- DRIVER CREATED ----------");
-
-        // Ensure logged in
-        AppUtils.bringToForeground();
-        AuthHelper.ensureLoggedIn(phoneNumber, ConfigManager.get("login.otp", ""));
-        log.info("---------- TEST READY ----------");
-    }
-
-    @AfterClass(alwaysRun = true)
-    public void tearDown() {
-        log.info("===== AFTER CLASS: Logging out =====");
-        try {
-            AuthHelper.logout();
-        } catch (Exception e) {
-            log.warn("Logout failed: {}", e.getMessage());
-        }
-        // Driver is destroyed by BaseTest.classTearDown()
-    }
-
-    // ==================== Test ====================
-
-    @Test(groups = {TestGroups.E2E, TestGroups.REGRESSION})
-    public void $(NAME)E2E_Success() {
-        log.info("===== Starting $(NAME) E2E Test =====");
-
-        // ======== STEP 1: Verify on Home Screen ========
-        log.info("===== STEP 1: Login verified =====");
-        ExtentReportListener.logStep("Step 1: Login completed with " + phoneNumber);
-
-        // ======== STEP 2: Navigate to feature ========
-        log.info("===== STEP 2: Navigate to feature =====");
-        // TODO: Add navigation steps
-
-        // ======== STEP 3: Perform actions ========
-        log.info("===== STEP 3: Perform actions =====");
-        // TODO: Add feature-specific actions
-
-        // ======== STEP 4: Validation ========
-        log.info("===== STEP 4: Validation =====");
-        // TODO: Add assertions and validations
-
-        log.info("===== $(NAME) E2E Test COMPLETED =====");
-    }
-}
-TEMPLATE_EOF
-	@echo "✅ Created: src/test/java/com/onsurity/tests/$(MODULE)/$(NAME)E2ETest.java"
+	printf 'package com.pice.tests.%s;\n\nimport com.pice.base.BaseTest;\nimport com.pice.config.ConfigManager;\nimport com.pice.constants.TestGroups;\nimport com.pice.listeners.ExtentReportListener;\nimport com.pice.utils.*;\nimport io.appium.java_client.AppiumDriver;\nimport org.openqa.selenium.By;\nimport org.openqa.selenium.WebElement;\nimport org.testng.Assert;\nimport org.testng.annotations.AfterClass;\nimport org.testng.annotations.BeforeClass;\nimport org.testng.annotations.BeforeSuite;\nimport org.testng.annotations.Test;\n\nimport java.util.List;\nimport java.util.Map;\n\npublic class %sE2ETest extends BaseTest {\n    private static final org.apache.logging.log4j.Logger log = org.apache.logging.log4j.LogManager.getLogger(%sE2ETest.class);\n    private String phoneNumber;\n\n    @BeforeSuite\n    public void suiteSetup() {\n        log.info("========== SUITE SETUP ==========");\n        phoneNumber = ConfigManager.get("login.mobile.number", "");\n        log.info("========== SUITE SETUP COMPLETE ==========");\n    }\n\n    @BeforeClass\n    public void setupDriver() {\n        createDriver(null);\n        AppUtils.bringToForeground();\n        AuthHelper.ensureLoggedIn(phoneNumber, ConfigManager.get("login.otp", ""));\n    }\n\n    @AfterClass(alwaysRun = true)\n    public void tearDown() {\n        try { AuthHelper.logout(); } catch (Exception e) {} \n    }\n\n    @Test(groups = {TestGroups.E2E, TestGroups.REGRESSION})\n    public void %sE2E_Success() {\n        log.info("===== Starting %s E2E Test =====");\n        ExtentReportListener.logStep("Step 1: Login completed");\n    }\n}\n' "$(MODULE)" "$(NAME)" "$(NAME)" "$(NAME)" "$(NAME)" > "$$TEST_FILE"
+	@echo "✅ Created: src/test/java/com/pice/tests/$(MODULE)/$(NAME)E2ETest.java"
 	@echo "📝 Next steps:"
 	@echo "   1. Edit the test class and fill in the TODO sections"
 	@echo "   2. Run: make run TEST=$(PKG_BASE).$(MODULE).$(NAME)E2ETest"
@@ -260,9 +242,21 @@ help:
 	@echo ""
 	@echo "  🧪 TEST TARGETS"
 	@echo "  ─────────────────────────────────────────────────────────"
-	@echo "  make test-all            Run full TestNG suite"
-	@echo "  make test-e2e            Run all E2E group tests"
-	@echo "  make test-regression     Run all regression tests"
+	@echo "  make test-all                Run full TestNG suite (all batches)"
+	@echo "  make test-e2e                Run all E2E group tests"
+	@echo "  make test-regression         Run all regression tests"
+	@echo ""
+	@echo "  📦 MODULE-WISE BATCH TARGETS"
+	@echo "  ─────────────────────────────────────────────────────────"
+	@echo "  make test-module MODULE=<m>  Run a named module batch"
+	@echo "       MODULE options: smoke | login | login-e2e | api | dashboard | cards"
+	@echo "  make test-batch-smoke        [Batch-1] Smoke — app launch"
+	@echo "  make test-batch-login        [Batch-2+3] Login smoke + regression"
+	@echo "  make test-batch-login-e2e    [Batch-4] Full login E2E flow"
+	@echo "  make test-batch-api          [Batch-5] API tests"
+	@echo "  make test-batch-dashboard    [Batch-6] Home Dashboard — all buttons"
+	@echo "  make test-batch-cards        [Batch-7] Cards — Add Card flow"
+	@echo "  make test-batch-history       [Batch-9] History — filters, transactions, E2E"
 	@echo ""
 	@echo "  🎯 CUSTOM RUN"
 	@echo "  ─────────────────────────────────────────────────────────"
@@ -303,6 +297,16 @@ help:
 	@echo "  ─────────────────────────────────────────────────────────"
 	@echo "  make test-all"
 	@echo "  make test-all ENV=production"
-	@echo "  make run TEST=com.onsurity.tests.login.LoginTest"
+	@echo "  make test-batch-smoke"
+	@echo "  make test-batch-login"
+	@echo "  make test-batch-login-e2e"
+	@echo "  make test-batch-api"
+	@echo "  make test-batch-dashboard"
+	@echo "  make test-module MODULE=dashboard ENV=staging"
+	@echo "  make test-module MODULE=cards ENV=staging"
+	@echo "  make test-module MODULE=login ENV=staging"
+	@echo "  make run TEST=com.pice.tests.login.LoginTest"
+	@echo "  make run TEST=com.pice.tests.dashboard.HomeDashboardTest"
+	@echo "  make run TEST=com.pice.tests.cards.AddCardFlowTest"
 	@echo "  make new-test NAME=HealthCheckup MODULE=health"
 	@echo ""

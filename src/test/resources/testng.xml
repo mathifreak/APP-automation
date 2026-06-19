@@ -1,33 +1,213 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
-<suite name="App Automation Suite" verbose="2" parallel="methods" thread-count="1">
+
+<!--
+  =========================================================
+   App Automation Suite — Module-wise Batching
+  =========================================================
+   Execution order (sequential by module):
+     1. Smoke
+     2. Login  → Smoke  → Regression  → E2E
+     3. Full Login Flow (physical device)
+     4. API
+  =========================================================
+-->
+<suite name="App Automation Suite"
+       verbose="2"
+       parallel="none"
+       thread-count="1">
 
     <listeners>
-        <listener class-name="com.onsurity.listeners.ExtentReportListener"/>
-        <listener class-name="com.onsurity.listeners.RetryTransformer"/>
+        <listener class-name="com.pice.listeners.ExtentReportListener"/>
+        <listener class-name="com.pice.listeners.RetryTransformer"/>
     </listeners>
 
-    <!-- ==================== Add Your Test Classes Below ==================== -->
-
-    <!--
-    <test name="Smoke Tests">
+    <!-- ===================================================
+         BATCH 1 — SMOKE
+         Quick sanity check: app launches and framework works
+         =================================================== -->
+    <test name="[Batch-1] Smoke" preserve-order="true">
         <groups>
             <run>
                 <include name="smoke"/>
             </run>
         </groups>
         <classes>
-            <class name="com.onsurity.tests.your_module.YourTest"/>
+            <class name="com.pice.tests.smoke.AppLaunchSmokeTest"/>
         </classes>
     </test>
-    -->
 
-    <!--
-    <test name="E2E Tests">
+    <!-- ===================================================
+         BATCH 2 — Login Module: Smoke
+         UI element checks and initial button-state guards
+         =================================================== -->
+    <test name="[Batch-2] Login — Smoke" preserve-order="true">
+        <groups>
+            <run>
+                <include name="smoke"/>
+                <include name="login"/>
+            </run>
+        </groups>
         <classes>
-            <class name="com.onsurity.tests.your_module.YourE2ETest"/>
+            <class name="com.pice.tests.login.LoginTest">
+                <methods>
+                    <include name="verifyLoginScreenElements"/>
+                    <include name="verifyProceedButtonDisabledByDefault"/>
+                </methods>
+            </class>
         </classes>
     </test>
-    -->
+
+    <!-- ===================================================
+         BATCH 3 — Login Module: Regression
+         Positive + Negative + Edge cases
+         =================================================== -->
+    <test name="[Batch-3] Login — Regression" preserve-order="true">
+        <groups>
+            <run>
+                <include name="regression"/>
+                <include name="login"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.pice.tests.login.LoginTest">
+                <methods>
+                    <!-- Positive -->
+                    <include name="verifyPhoneNumberEntry"/>
+                    <include name="verifyProceedButtonEnabledAfterConsent"/>
+                    <include name="verifyLoginFlowUpToProceed"/>
+                    <!-- Negative -->
+                    <include name="verifyProceedDisabledForShortNumber"/>
+                    <include name="verifyProceedDisabledWithoutConsent"/>
+                    <include name="verifyProceedDisabledForEmptyNumber"/>
+                    <include name="verifyPhoneFieldNumericOnly"/>
+                    <!-- Edge -->
+                    <include name="verifyConsentCheckboxToggle"/>
+                    <include name="verifyHelpButtonNavigation"/>
+                    <include name="verifyRootDetectionOnEmulator"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- ===================================================
+         BATCH 4 — Login Module: Full E2E Flow
+         Login → OTP → Permission → Dashboard
+         Requires physical device + valid credentials
+         =================================================== -->
+    <test name="[Batch-4] Login — Full E2E Flow" preserve-order="true">
+        <groups>
+            <run>
+                <include name="smoke"/>
+                <include name="positive"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.pice.tests.login.FullLoginFlowTest">
+                <methods>
+                    <include name="verifyFullLoginToDashboard"/>
+                    <include name="verifyPermissionScreenElements"/>
+                    <include name="verifyDashboardElements"/>
+                    <include name="verifyDashboardNavigation"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- ===================================================
+         BATCH 5 — API Tests
+         REST Assured / backend validation
+         =================================================== -->
+    <test name="[Batch-5] API Tests" preserve-order="true">
+        <groups>
+            <run>
+                <include name="smoke"/>
+                <include name="api"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.pice.tests.api.SampleApiTest"/>
+        </classes>
+    </test>
+
+    <!-- ===================================================
+         BATCH 6 — Home Dashboard Module
+         Click all buttons, navigate all tabs, verify all sections
+         Requires physical device + valid credentials
+         =================================================== -->
+    <test name="[Batch-6] Home Dashboard" preserve-order="true">
+        <classes>
+            <class name="com.pice.tests.dashboard.HomeDashboardTest">
+                <methods>
+                    <!-- Smoke -->
+                    <include name="verifyDashboardScreenElements"/>
+                    <!-- Bottom Navigation -->
+                    <include name="verifyBottomNavHomeTab"/>
+                    <include name="verifyBottomNavCardsTab"/>
+                    <include name="verifyBottomNavLoanTab"/>
+                    <include name="verifyBottomNavHistoryTab"/>
+                    <!-- Payment Categories -->
+                    <include name="verifyBusinessCategoryTap"/>
+                    <include name="verifyTaxesCategoryTap"/>
+                    <include name="verifyEducationCategoryTap"/>
+                    <!-- Action Buttons -->
+                    <include name="verifyCoinsDisplayTap"/>
+                    <include name="verifyMakePaymentButton"/>
+                    <include name="verifyExploreNowTap"/>
+                    <include name="verifyReferralCardTap"/>
+                    <!-- E2E -->
+                    <include name="verifyFullNavigationCycle"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- ===================================================
+         BATCH 7 — Cards Module: Add Card Flow
+         Navigate to Cards tab, verify Add Card form, fill & submit
+         Requires physical device + valid credentials
+         =================================================== -->
+    <test name="[Batch-7] Cards — Add Card Flow" preserve-order="true">
+        <classes>
+            <class name="com.pice.tests.cards.AddCardFlowTest">
+                <methods>
+                    <!-- Smoke -->
+                    <include name="verifyCardsScreenElements"/>
+                    <include name="verifyAddCardButtonVisible"/>
+                    <!-- Positive — Navigation -->
+                    <include name="verifyAddCardButtonNavigation"/>
+                    <include name="verifyAddCardFormElements"/>
+                    <!-- Positive — Field Interactions -->
+                    <include name="verifyCardNumberFieldInput"/>
+                    <include name="verifyExpiryDateFieldInput"/>
+                    <include name="verifyCvvFieldInput"/>
+                    <include name="verifyCardholderNameFieldInput"/>
+                    <!-- Negative — Validation -->
+                    <include name="verifySubmitDisabledWithEmptyFields"/>
+                    <include name="verifyInvalidCardNumberRejected"/>
+                    <!-- Positive — Back Navigation -->
+                    <include name="verifyBackNavigationFromAddCard"/>
+                    <include name="verifyBackNavigationFromCardsToDashboard"/>
+                    <!-- E2E -->
+                    <include name="verifyAddCardE2EFlow"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- ===================================================
+         BATCH 8 — Payment Module: Add Beneficiary Flow
+         Requires physical device + valid credentials
+         =================================================== -->
+    <test name="[Batch-8] Payment — Add Beneficiary Flow" preserve-order="true">
+        <classes>
+            <class name="com.pice.tests.payment.AddBeneficiaryTest">
+                <methods>
+                    <include name="testAddNewBeneficiaryFromDashboard"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
 
 </suite>
+

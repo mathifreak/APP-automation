@@ -47,7 +47,23 @@ src/test/resources/config/staging.properties
 src/test/resources/config/production.properties
 src/test/resources/config/.phone_counter
 
+# === UI Automator Dumps (development only) ===
+ui_dump*.xml
+login_*.xml
+otp_*.xml
+after_root*.xml
+ui_post_reset.xml
+uidump.xml
+window_dump.xml
+
+# === Allure ===
+.allure/
+
+# === Exploration / Dev notes ===
+exploration/
+
 # === Maven ===
 dependency-reduced-pom.xml
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
+

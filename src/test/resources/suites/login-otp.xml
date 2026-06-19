@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!-- Run: make test-batch-login-otp -->
+<!-- Requires: Physical device + valid registered phone number (test.mobile.number) -->
+<!-- Session: OTP screen is navigated via phone + consent + Proceed in @BeforeMethod -->
+<suite name="Login OTP Validation Batch" verbose="2" parallel="none" thread-count="1">
+
+    <listeners>
+        <listener class-name="com.pice.listeners.ExtentReportListener"/>
+        <listener class-name="com.pice.listeners.RetryTransformer"/>
+    </listeners>
+
+    <!-- OTP Smoke: Screen elements + field count -->
+    <test name="[Batch-OTP-Smoke] OTP Screen — Smoke" preserve-order="true">
+        <classes>
+            <class name="com.pice.tests.login.OtpValidationTest">
+                <methods>
+                    <include name="verifyOtpScreenElements"/>
+                    <include name="verifyOtpFieldCount"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- OTP Regression: Resend timer + wrong/partial/invalid OTP entry -->
+    <test name="[Batch-OTP-Regression] OTP Validation — Regression" preserve-order="true">
+        <classes>
+            <class name="com.pice.tests.login.OtpValidationTest">
+                <methods>
+                    <!-- Resend OTP -->
+                    <include name="verifyResendTimerVisibleOnLoad"/>
+                    <include name="verifyResendButtonBlockedBeforeTimer"/>
+                    <!-- Negative OTP Entry -->
+                    <include name="verifyEmptyOtpBlocksProceed"/>
+                    <include name="verifyPartialOtpBlocksProceed"/>
+                    <include name="verifyWrongOtpShowsError"/>
+                    <include name="verifyOtpWithAlphaCharsIsRejected"/>
+                    <include name="verifyOtpWithSpecialCharsIsRejected"/>
+                    <include name="verifyFiveDigitOtpBlocksSubmit"/>
+                    <!-- Network Edge Case -->
+                    <include name="verifyNoNetworkOtpRequest"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- OTP Resend Long-Wait: waits up to 65 seconds for timer — run separately if needed -->
+    <test name="[Batch-OTP-Resend] OTP Resend Flow — Timer Wait" preserve-order="true">
+        <classes>
+            <class name="com.pice.tests.login.OtpValidationTest">
+                <methods>
+                    <include name="verifyResendOtpAfterTimerExpiry"/>
+                    <include name="verifyResendOtpGeneratesNewOtp"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+</suite>

@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.onsurity</groupId>
+    <groupId>com.pice</groupId>
     <artifactId>app-automation</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -41,6 +41,9 @@
 
         <!-- TestNG Suite File (override with -Dtestng.suite.file=...) -->
         <testng.suite.file>src/test/resources/testng.xml</testng.suite.file>
+
+        <!-- Allure Reporting -->
+        <allure.version>2.29.0</allure.version>
     </properties>
 
     <dependencies>
@@ -63,6 +66,12 @@
             <groupId>com.aventstack</groupId>
             <artifactId>extentreports</artifactId>
             <version>${extentreports.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-testng</artifactId>
+            <version>${allure.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <!-- ==================== Logging (Log4j2) ==================== -->
@@ -154,7 +163,7 @@
                     <properties>
                         <property>
                             <name>listener</name>
-                            <value>com.onsurity.listeners.ExtentReportListener</value>
+                            <value>com.pice.listeners.ExtentReportListener</value>
                         </property>
                     </properties>
                     <systemPropertyVariables>
@@ -162,6 +171,17 @@
                         <env>${env}</env>
                         <deviceName>${deviceName}</deviceName>
                     </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+            <!-- Allure Maven Plugin -->
+            <plugin>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-maven</artifactId>
+                <version>2.12.0</version>
+                <configuration>
+                    <reportVersion>${allure.version}</reportVersion>
+                    <resultsDirectory>${project.basedir}/allure-results</resultsDirectory>
                 </configuration>
             </plugin>
         </plugins>

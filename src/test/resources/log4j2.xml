@@ -40,7 +40,7 @@
 
     <Loggers>
         <!-- Framework logger -->
-        <Logger name="com.onsurity" level="INFO" additivity="false">
+        <Logger name="com.pice" level="INFO" additivity="false">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="FileLogger"/>
             <AppenderRef ref="ErrorLogger"/>

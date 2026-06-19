@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!-- Run: make test-batch-dashboard -->
+<!-- Requires: physical device + valid credentials (test.mobile.number, test.otp) -->
+<suite name="Home Dashboard Batch" verbose="2" parallel="none" thread-count="1">
+
+    <listeners>
+        <listener class-name="com.pice.listeners.ExtentReportListener"/>
+        <listener class-name="com.pice.listeners.RetryTransformer"/>
+    </listeners>
+
+    <!-- Smoke: Verify all dashboard UI elements -->
+    <test name="[Batch-6] Home Dashboard — Smoke" preserve-order="true">
+        <classes>
+            <class name="com.pice.tests.dashboard.HomeDashboardTest">
+                <methods>
+                    <include name="verifyDashboardScreenElements"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- Regression: Click all buttons, navigate, return -->
+    <test name="[Batch-6] Home Dashboard — Regression" preserve-order="true">
+        <classes>
+            <class name="com.pice.tests.dashboard.HomeDashboardTest">
+                <methods>
+                    <!-- Bottom Navigation -->
+                    <include name="verifyBottomNavHomeTab"/>
+                    <include name="verifyBottomNavCardsTab"/>
+                    <include name="verifyBottomNavLoanTab"/>
+                    <include name="verifyBottomNavHistoryTab"/>
+                    <!-- Payment Categories -->
+                    <include name="verifyBusinessCategoryTap"/>
+                    <include name="verifyTaxesCategoryTap"/>
+                    <include name="verifyEducationCategoryTap"/>
+                    <!-- Action Buttons -->
+                    <include name="verifyCoinsDisplayTap"/>
+                    <include name="verifyMakePaymentButton"/>
+                    <include name="verifyExploreNowTap"/>
+                    <include name="verifyReferralCardTap"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- E2E: Full navigation cycle -->
+    <test name="[Batch-6] Home Dashboard — E2E" preserve-order="true">
+        <classes>
+            <class name="com.pice.tests.dashboard.HomeDashboardTest">
+                <methods>
+                    <include name="verifyFullNavigationCycle"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+</suite>

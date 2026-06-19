@@ -10,7 +10,7 @@ Built with industry-standard patterns: Page Object Model, TestNG lifecycle, Exte
 
 ```
 src/
-├── main/java/com/onsurity/
+├── main/java/com/pice/
 │   ├── config/              # ConfigManager, AppCapabilities
 │   ├── driver/              # DriverFactory, DriverManager, DeviceType
 │   ├── exceptions/          # Custom framework exceptions
@@ -18,7 +18,7 @@ src/
 │   └── utils/               # AppUtils, GestureUtils, WaitUtils, AuthHelper, etc.
 │
 └── test/
-    ├── java/com/onsurity/
+    ├── java/com/pice/
     │   ├── base/            # BaseTest (TestNG lifecycle)
     │   ├── constants/       # TestGroups
     │   └── listeners/       # ExtentReportListener, RetryAnalyzer
@@ -90,13 +90,13 @@ Edit `src/test/resources/capabilities/android.json`:
 make new-test NAME=Login MODULE=login
 ```
 
-This creates `src/test/java/com/onsurity/tests/login/LoginE2ETest.java` with a ready-to-fill template.
+This creates `src/test/java/com/pice/tests/login/LoginE2ETest.java` with a ready-to-fill template.
 
 ### 4. Run
 
 ```bash
 # Run a specific test
-make run TEST=com.onsurity.tests.login.LoginE2ETest
+make run TEST=com.pice.tests.login.LoginE2ETest
 
 # Run all tests
 make test-all
@@ -112,9 +112,9 @@ make test-by-group GROUP=smoke
 Extend `BasePage` for each screen:
 
 ```java
-package com.onsurity.pages.login;
+package com.pice.pages.login;
 
-import com.onsurity.pages.BasePage;
+import com.pice.pages.BasePage;
 import io.appium.java_client.AppiumBy;
 import org.openqa.selenium.By;
 
@@ -150,10 +150,10 @@ public class LoginPage extends BasePage {
 Extend `BaseTest` for each test class:
 
 ```java
-package com.onsurity.tests.login;
+package com.pice.tests.login;
 
-import com.onsurity.base.BaseTest;
-import com.onsurity.constants.TestGroups;
+import com.pice.base.BaseTest;
+import com.pice.constants.TestGroups;
 import org.testng.annotations.Test;
 
 public class LoginTest extends BaseTest {

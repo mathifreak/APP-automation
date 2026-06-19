@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!-- Run: make test-module MODULE=login-e2e -->
+<!-- Requires: physical device + valid credentials (test.mobile.number, test.otp) -->
+<suite name="Login E2E Batch" verbose="2" parallel="none" thread-count="1">
+
+    <listeners>
+        <listener class-name="com.pice.listeners.ExtentReportListener"/>
+        <listener class-name="com.pice.listeners.RetryTransformer"/>
+    </listeners>
+
+    <test name="[Batch-4] Login — Full E2E Flow" preserve-order="true">
+        <groups>
+            <run>
+                <include name="smoke"/>
+                <include name="positive"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.pice.tests.login.FullLoginFlowTest">
+                <methods>
+                    <include name="verifyFullLoginToDashboard"/>
+                    <include name="verifyPermissionScreenElements"/>
+                    <include name="verifyDashboardElements"/>
+                    <include name="verifyDashboardNavigation"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+</suite>

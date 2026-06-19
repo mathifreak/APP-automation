@@ -17,10 +17,10 @@ android.app.path=src/test/resources/apps/app-production.apk
 ios.app.path=src/test/resources/apps/app-production.ipa
 
 # --- App Bundle ID ---
-app.bundle.id=com.onsurity.app
+app.bundle.id=
 
 # --- API Base URL ---
-api.base.url=https://api.onsurity.com
+api.base.url=
 
 # --- Test Credentials (production test account) ---
 test.mobile.number=
